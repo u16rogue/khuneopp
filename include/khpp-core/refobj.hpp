@@ -24,7 +24,7 @@ struct refobj {
   }
 
   ~refobj() noexcept {
-    if (this->iref) {
+    if (this->iref != KH_REFOBJ_INVALID_IREF) {
       kh_refobj_iremove(&this->iref);
     }
   }
@@ -76,7 +76,7 @@ struct irefobj {
     if (this->iref != KH_REFOBJ_INVALID_IREF) {
       kh_refobj_iremove(&this->iref);
     }
-    *this;
+    return *this;
   }
 
   auto copy(self & other) -> self & {
