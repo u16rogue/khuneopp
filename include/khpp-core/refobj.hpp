@@ -24,7 +24,9 @@ struct refobj {
   }
 
   ~refobj() noexcept {
-    kh_refobj_iremove(&this->iref);
+    if (this->iref) {
+      kh_refobj_iremove(&this->iref);
+    }
   }
 
   auto alive() const noexcept -> bool {
@@ -70,17 +72,26 @@ struct irefobj {
     kh_refobj_icopy(&parent.iref, &this->iref);
   }
 
+  auto remove() -> self & {
+    if (this->iref != KH_REFOBJ_INVALID_IREF) {
+      kh_refobj_iremove(&this->iref);
+    }
+    *this;
+  }
+
   auto copy(self & other) -> self & {
+    remove();
     kh_refobj_icopy(&other.iref, &this->iref);
     return *this;
   }
 
   auto move(self && other) -> self & {
+    remove();
     kh_refobj_imove(&other.iref, &this->iref);
     return *this;
   }
 
-  irefobj(self & rhs) {
+  irefobj(self & rhs) { 
     copy(rhs);
   }
 
@@ -89,7 +100,7 @@ struct irefobj {
   }
 
   ~irefobj() {
-    kh_refobj_iremove(&this->iref);
+    remove();
   }
 
   auto alive() const noexcept -> bool{

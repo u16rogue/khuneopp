@@ -1,7 +1,8 @@
 #pragma once
 
+#if defined(KHPP_ASTGEN) && KHPP_ASTGEN == 1
+
 extern "C" {
-  #include <kh-core/refobj.h>
   #include <kh-astgen/lexer.h>
 }
 
@@ -9,9 +10,11 @@ extern "C" {
 
 namespace khpp::lexer {
 
-using status = kh_lexer_status;
 using raw_code_ref = khpp::refobj::irefobj<kh_utf8sp>;
-using result = kh_lexer_parse_result;
+using status       = kh_lexer_status;
+using token_type   = kh_lexer_token_type;
+using result_value = kh_lexer_parse_result_value;
+using result       = kh_lexer_parse_result;
 
 enum class action {
   STOP,
@@ -45,7 +48,7 @@ struct context {
   /*
    *  Implements `kh_lexer_context_parse_next`
    */
-  auto parse_next(result & out_result) -> status;
+  auto parse_next(lexer::result & out_result) -> status;
 
   /*
    *  # Parse context
@@ -70,8 +73,8 @@ struct context {
   template <typename T, typename U, bool has_error_handler = true>
   auto parse(T && cb, U && err) -> bool {
 
-    while (true) {
-      result result = {
+    for (;;) {
+      lexer::result result = {
         .type  = KH_LEXER_TOKEN_TYPE_NONE,
         .value = {},
       };
@@ -128,6 +131,8 @@ struct context {
     }( [](status) -> action { return action::_INVALID; } );
   }
 
+  auto operator->() const noexcept -> const kh_lexer_context *;
+
 private:
   kh_lexer_context ctx = {
     ._code_buffer = KH_REFOBJ_INVALID_IREF,
@@ -136,3 +141,5 @@ private:
 };
 
 } // namespace khpp::lexer
+
+#endif

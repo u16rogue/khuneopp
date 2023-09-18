@@ -15,6 +15,10 @@ khpp::lexer::context::operator bool() const noexcept {
   return ctx._code_buffer != KH_REFOBJ_INVALID_IREF;
 }
 
-auto khpp::lexer::context::parse_next(result & out_result) -> status {
+auto khpp::lexer::context::parse_next(lexer::result & out_result) -> status {
   return kh_lexer_context_parse_next(&this->ctx, &out_result);
+}
+
+auto khpp::lexer::context::operator->() const noexcept -> const kh_lexer_context * {
+  return &ctx;
 }
